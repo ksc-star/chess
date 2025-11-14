@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field
 
 from openai import OpenAI
 
+from fastapi.responses import RedirectResponse
+
+
 # ============================================================
 #  환경 변수 설정
 # ============================================================
@@ -149,6 +152,11 @@ class StockfishEngine:
 # ============================================================
 
 app = FastAPI(title="GPT + Stockfish Chess Tutor")
+
+@app.get("/", include_in_schema=False)
+def root():
+    # / 로 들어오면 자동으로 /docs 로 리다이렉트
+    return RedirectResponse(url="/docs")
 
 # 서버 시작 시 한 번만 Stockfish 인스턴스 생성
 stockfish_engine = StockfishEngine(path=STOCKFISH_PATH, depth=15)
@@ -330,3 +338,4 @@ def analyze_position(req: AnalyzeRequest):
         stockfish=StockfishResult(**sf_result_dict),
         explanation=explanation,
     )
+
