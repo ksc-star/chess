@@ -35,11 +35,8 @@ target = candidate_paths[0]
 
 print("Using stockfish binary at:", target, flush=True)
 
-# 프로젝트 루트로 옮기고 이름을 './stockfish'로 통일
-if os.path.exists("stockfish"):
-    os.remove("stockfish")
+# 실행 권한만 주기
+os.chmod(target, 0o755)
 
-os.rename(target, "stockfish")
-os.chmod("stockfish", 0o755)
+print(f"Stockfish is ready at {target}", flush=True)
 
-print("Stockfish is ready at ./stockfish", flush=True)
