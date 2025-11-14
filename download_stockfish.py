@@ -15,21 +15,30 @@ with tarfile.open("stockfish.tar") as tar:
 print("Extracted stockfish.tar", flush=True)
 
 # 압축 풀린 곳에서 'stockfish'로 시작하는 실행 파일 찾기
-target = None
+candidate_paths = []
+
 for dirpath, dirnames, filenames in os.walk("."):
     for filename in filenames:
-        if filename.startswith("stockfish"):
-            target = os.path.join(dirpath, filename)
-            break
-    if target:
-        break
+        # 1) 이름이 'stockfish'로 시작
+        # 2) .tar 같은 압축파일은 제외
+        if filename.startswith("stockfish") and not filename.endswith(".tar"):
+            candidate_paths.append(os.path.join(dirpath, filename))
 
-if not target:
+if not candidate_paths:
     raise SystemExit("ERROR: Could not find stockfish binary after extracting.")
 
-print("Found stockfish binary at:", target, flush=True)
+print("Found candidate stockfish paths:", candidate_paths, flush=True)
+
+# 가장 짧은 경로(루트에 더 가까운 것)를 하나 선택
+candidate_paths.sort(key=len)
+target = candidate_paths[0]
+
+print("Using stockfish binary at:", target, flush=True)
 
 # 프로젝트 루트로 옮기고 이름을 './stockfish'로 통일
+if os.path.exists("stockfish"):
+    os.remove("stockfish")
+
 os.rename(target, "stockfish")
 os.chmod("stockfish", 0o755)
 
