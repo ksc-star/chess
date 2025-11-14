@@ -1,0 +1,28 @@
+services:
+  - name: chess-tutor-api
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+
+      # --- Stockfish 다운로드 & 설치 ---
+      curl -L "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-ubuntu-x86-64.tar" -o stockfish.tar
+
+      # 압축 풀기
+      tar -xf stockfish.tar
+
+      # 압축 풀린 폴더들 중에서 이름이 'stockfish' 인 실행 파일을 찾아서
+      # 프로젝트 루트로 옮기고 이름을 ./stockfish 로 통일
+      STOCKFISH_PATH_IN_TAR=$(find . -maxdepth 4 -type f -name "stockfish" | head -n 1)
+      mv "$STOCKFISH_PATH_IN_TAR" ./stockfish
+
+      # 실행 권한 주기
+      chmod +x ./stockfish
+
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false       # Render 대시보드에서 직접 값 입력
+      - key: STOCKFISH_PATH
+        value: "./stockfish"
